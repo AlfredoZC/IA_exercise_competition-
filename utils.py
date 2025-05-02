@@ -1,17 +1,12 @@
-
-import mediapipe as mp
-import pandas as pd
 import numpy as np
 import cv2
 
-mp_pose = mp.solutions.pose
-
 def calculate_angle(a, b, c):
-    a = np.array(a)  
-    b = np.array(b)  
-    c = np.array(c)  
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
 
-    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) -\
+    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - \
               np.arctan2(a[1] - b[1], a[0] - b[0])
     angle = np.abs(radians * 180.0 / np.pi)
 
@@ -20,34 +15,22 @@ def calculate_angle(a, b, c):
 
     return angle
 
+def score_table(exercise, frame, counter1, status1, counter2, status2, time_left):
+    height, width, _ = frame.shape
+    mid_x = width // 2
 
+    cv2.line(frame, (mid_x, 0), (mid_x, height), (255, 255, 255), 2)
 
-def detection_body_part(landmarks, body_part_name):
-    return [
-        landmarks[mp_pose.PoseLandmark[body_part_name].value].x,
-        landmarks[mp_pose.PoseLandmark[body_part_name].value].y,
-        landmarks[mp_pose.PoseLandmark[body_part_name].value].visibility
-    ]
+    cv2.putText(frame, "Player 1", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "Activity: " + exercise.replace("-", " "), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "Counter: " + str(counter1), (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "Status: " + str(status1), (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "Time Left: " + str(time_left) + "s", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
 
+    cv2.putText(frame, "Player 2", (mid_x + 10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "Activity: " + exercise.replace("-", " "), (mid_x + 10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "Counter: " + str(counter2), (mid_x + 10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "Status: " + str(status2), (mid_x + 10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "Time Left: " + str(time_left) + "s", (mid_x + 10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
 
-def detection_body_parts(landmarks):
-    body_parts = pd.DataFrame(columns=["body_part", "x", "y"])
-
-    for i, lndmrk in enumerate(mp_pose.PoseLandmark):
-        lndmrk = str(lndmrk).split(".")[1]
-        cord = detection_body_part(landmarks, lndmrk)
-        body_parts.loc[i] = lndmrk, cord[0], cord[1]
-
-    return body_parts
-
-
-def score_table(exercise, frame , counter, status):
-    cv2.putText(frame, "Activity : " + exercise.replace("-", " "),
-                (10, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2,
-                cv2.LINE_AA)
-    cv2.putText(frame, "Counter : " + str(counter), (10, 100),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
-    cv2.putText(frame, "Status : " + str(status), (10, 135),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
     return frame
-    
